@@ -199,7 +199,6 @@ const postCtrl = {
                 { $match: { user : { $nin: newArr } } },
                 { $sample: { size: Number(num) } },
             ])
-
             return res.json({
                 msg: 'Success!',
                 result: posts.length,
@@ -264,7 +263,7 @@ const postCtrl = {
                 _id: {$in: req.user.saved}
             }), req.query).paginating()
 
-            const savePosts = await features.query.sort("-createdAt")
+            const savePosts = await features.query.sort("-createdAt")            .populate("user likes", "avatar username fullname followers")
 
             res.json({
                 savePosts,
