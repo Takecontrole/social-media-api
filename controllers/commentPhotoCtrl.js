@@ -1,25 +1,25 @@
 const Comments = require('../models/commentModel')
-const Posts = require('../models/postModel')
+const Photos = require('../models/photoModel')
 
 
-const commentCtrl = {
+const commentPhotoCtrl = {
     createComment: async (req, res) => {
         try {
-            const { postId, content, tag, reply, postUserId } = req.body
+            const { photoId, content, tag, reply, photoUserId } = req.body
 
-            const post = await Posts.findById(postId)
-            if(!post) return res.status(400).json({msg: "This post does not exist."})
+            const photo = await Photos.findById(photoId)
+            if(!photo) return res.status(400).json({msg: "This видео does not exist."})
 
             if(reply){
                 const cm = await Comments.findById(reply)
-                if(!cm) return res.status(400).json({msg: "This comment does not exist."})
+                if(!cm) return res.status(400).json({msg: "This коммент does not exist."})
             }
 
             const newComment = new Comments({
-                user: req.user._id, content, tag, reply, postUserId, postId
+                user: req.user._id, content, tag, reply, photoUserId, photoId
             })
 
-            await Posts.findOneAndUpdate({_id: postId}, {
+            await Photos.findOneAndUpdate({_id: photoId}, {
                 $push: {comments: newComment._id}
             }, {new: true})
 
@@ -39,7 +39,7 @@ const commentCtrl = {
                 _id: req.params.id, user: req.user._id
             }, {content})
 
-            res.json({msg: 'Обновлён успешно!'})
+            res.json({msg: 'Успешно обновлено!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -48,7 +48,7 @@ const commentCtrl = {
     likeComment: async (req, res) => {
         try {
             const comment = await Comments.find({_id: req.params.id, likes: req.user._id})
-            if(comment.length > 0) return res.status(400).json({msg: "You liked this post."})
+            if(comment.length > 0) return res.status(400).json({msg: "You liked this photo."})
 
             await Comments.findOneAndUpdate({_id: req.params.id}, {
                 $push: {likes: req.user._id}
@@ -79,11 +79,11 @@ const commentCtrl = {
                 _id: req.params.id,
                 $or: [
                     {user: req.user._id},
-                    {postUserId: req.user._id}
+                    {photoUserId: req.user._id}
                 ]
             })
 
-            await Posts.findOneAndUpdate({_id: comment.postId}, {
+            await Photos.findOneAndUpdate({_id: comment.photoId}, {
                 $pull: {comments: req.params.id}
             })
 
@@ -96,4 +96,4 @@ const commentCtrl = {
 }
 
 
-module.exports = commentCtrl
+module.exports = commentPhotoCtrl

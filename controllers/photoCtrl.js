@@ -1,7 +1,6 @@
-const Videos = require('../models/videoModel')
+const Photos = require('../models/photoModel')
 const Comments = require('../models/commentModel')
 const Users = require('../models/userModel')
-
 
 class APIfeatures {
     constructor(query, queryString){
@@ -18,11 +17,10 @@ class APIfeatures {
     }
 }
 
-
-const videoCtrl = { 
-  searchVideo: async (req, res) => {
+const photoCtrl = { 
+  searchPhoto: async (req, res) => {
         try {
-            const videos = await Videos.find({content: {$regex: req.query.content}})
+            const photos = await Photos.find({content: {$regex: req.query.content}})
             .limit(10).select("content images likes comments user createdAt")
              .populate("user likes", "avatar username fullname followers")
             .populate({
@@ -32,41 +30,41 @@ const videoCtrl = {
                     select: "-password"
                 }
             })
-            res.json({videos})
+            res.json({photos})
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
     },
-    createVideo: async (req, res) => {
+    createPhoto: async (req, res) => {
         try {
             const { content, images } = req.body
 
             if(images.length === 0)
-            return res.status(400).json({msg: "Добавьте видео."})
+            return res.status(400).json({msg: "Please add your photo."})
 
-            const newVideo = new Videos({
+            const newPhoto = new Photos({
                 content, images, user: req.user._id
             })
-            await newVideo.save()
+            await newPhoto.save()
 
             res.json({
-                msg: 'Created video!',
-                newVideo: {
-                    ...newVideo._doc,
+                msg: 'Created !',
+                newPhoto: {
+                    ...newPhoto._doc,
                     user: req.user
                 }
             })
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
-    }, 
-    getVideos: async (req, res) => {
+    },
+    getPhotos: async (req, res) => {
         try {
-            const features =  new APIfeatures(Videos.find({
-               // user: [...req.user.following, req.user._id]
+            const features =  new APIfeatures(Photos.find({
+                //user: [...req.user.following, req.user._id]
             }), req.query).paginating()
 
-            const videos = await features.query.sort('-createdAt')
+            const photos = await features.query.sort('-createdAt')
             .populate("user likes", "avatar username fullname followers")
             .populate({
                 path: "comments",
@@ -78,19 +76,19 @@ const videoCtrl = {
 
             res.json({
                 msg: 'Успешно!',
-                result: videos.length,
-                videos
+                result: photos.length,
+                photos
             })
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
     },
- updateVideo: async (req, res) => {
+    updatePhoto: async (req, res) => {
         try {
             const { content, images } = req.body
 
-            const video = await Videos.findOneAndUpdate({_id: req.params.id}, {
+            const photo = await Photos.findOneAndUpdate({_id: req.params.id}, {
                 content, images
             }).populate("user likes", "avatar username fullname")
             .populate({
@@ -102,9 +100,9 @@ const videoCtrl = {
             })
 
             res.json({
-                msg: "Видео обновлено!",
-                newVideo: {
-                    ...video._doc,
+                msg: "Updated!",
+                newPhoto: {
+                    ...photo._doc,
                     content, images
                 }
             })
@@ -112,50 +110,43 @@ const videoCtrl = {
             return res.status(500).json({msg: err.message})
         }
     },
-    getVideo: async (req, res) => {
+    likePhoto: async (req, res) => {
         try {
-            const video = await Videos.findById(req.params.id)
-            .populate("user likes", "avatar username fullname followers")
-            .populate({
-                path: "comments",
-                populate: {
-                    path: "user likes",
-                    select: "-password"
-                }
-            })
+            const photo = await Photos.find({_id: req.params.id, likes: req.user._id})
+            if(photo.length > 0) return res.status(400).json({msg: "You liked this photo."})
 
-            if(!video) return res.status(400).json({msg: 'Видео не существует.'})
+            const like = await Photos.findOneAndUpdate({_id: req.params.id}, {
+                $push: {likes: req.user._id}
+            }, {new: true})
 
-            res.json({
-                video
-            })
+            if(!like) return res.status(400).json({msg: 'This ph does not exist.'})
+
+            res.json({msg: 'Liked !'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
     },
-    deleteVideo: async (req, res) => {
+    unLikePhoto: async (req, res) => {
         try {
-            const video = await Videos.findOneAndDelete({_id: req.params.id, user: req.user._id})
-            await Comments.deleteMany({_id: {$in: video.comments }})
 
-            res.json({
-                msg: 'Видео удаленно!',
-                newVideo: {
-                    ...video,
-                   user: req.user
-                }
-            })
+            const like = await Photos.findOneAndUpdate({_id: req.params.id}, {
+                $pull: {likes: req.user._id}
+            }, {new: true})
+
+            if(!like) return res.status(400).json({msg: 'This ph does not exist.'})
+
+            res.json({msg: 'UnLiked !'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
-    }, 
-    getUserVideos: async (req, res) => {
+    },
+    getUserPhotos: async (req, res) => {
         try {
-            const features = new APIfeatures(Videos.find({user: req.params.id}), req.query)
+            const features = new APIfeatures(Photos.find({user: req.params.id}), req.query)
             .paginating()
-            const videos = await features.query.sort("-createdAt")    
+            const photos = await features.query.sort("-createdAt")    
 
    .populate("user likes", "avatar username fullname followers")
             .populate({
@@ -167,90 +158,95 @@ const videoCtrl = {
             })
             
             res.json({
-                videos,
-                result: videos.length
+                photos,
+                result: photos.length
             })
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
     },
-        likeVideo: async (req, res) => {
+    getPhoto: async (req, res) => {
         try {
-            const video = await Videos.find({_id: req.params.id, likes: req.user._id})
-            if(video.length > 0) return res.status(400).json({msg: "You liked this video."})
+            const photo = await Photos.findById(req.params.id)
+            .populate("user likes", "avatar username fullname followers")
+            .populate({
+                path: "comments",
+                populate: {
+                    path: "user likes",
+                    select: "-password"
+                }
+            })
 
-           const like =
-            await Videos.findOneAndUpdate({_id: req.params.id}, {
-                $push: {likes: req.user._id}
-            }, {new: true})
-
-            if(!like) return res.status(400).json({msg: 'This vid does not exist.'})
-
-            res.json({msg: 'Лайк'})
-
-        } catch (err) {
-            return res.status(500).json({msg: err.message})
-        }
-    },
-    unLikeVideo: async (req, res) => {
-        try {
-
-            const like = 
-            await Videos.findOneAndUpdate({_id: req.params.id}, {
-                $pull: {likes: req.user._id}
-            }, {new: true})
-
-            if(!like) return res.status(400).json({msg: 'This vid does not exist.'})
-
-            res.json({msg: 'Лайк удалён'})
-
-        } catch (err) {
-            return res.status(500).json({msg: err.message})
-        }
-    },
-        saveVideo: async (req, res) => {
-        try {
-            const user = await Users.find({_id: req.user._id, savedVideo: req.params.id})
-            if(user.length > 0) return res.status(400).json({msg: "You saved this post."})
-
-            const save = await Users.findOneAndUpdate({_id: req.user._id}, {
-                $push: {savedVideo: req.params.id}
-            }, {new: true})
-
-            if(!save) return res.status(400).json({msg: 'This user does not exist.'})
-
-            res.json({msg: 'Saved Post!'})
-
-        } catch (err) {
-            return res.status(500).json({msg: err.message})
-        }
-    },
-    unSaveVideo: async (req, res) => {
-        try {
-            const save = await Users.findOneAndUpdate({_id: req.user._id}, {
-                $pull: {savedVideo: req.params.id}
-            }, {new: true})
-
-            if(!save) return res.status(400).json({msg: 'This user does not exist.'})
-
-            res.json({msg: 'Удалено из закладок'})
-
-        } catch (err) {
-            return res.status(500).json({msg: err.message})
-        }
-    },
-    getSaveVideos: async (req, res) => {
-        try {
-            const features = new APIfeatures(Videos.find({
-                _id: {$in: req.user.savedVideo}
-            }), req.query).paginating()
-
-            const saveVideos = await features.query.sort("-createdAt")            .populate("user likes", "avatar username fullname followers")
+            if(!photo) return res.status(400).json({msg: 'This photo does not exist.'})
 
             res.json({
-                saveVideos,
-                result: saveVideos.length
+                photo
+            })
+
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    },
+    deletePhoto: async (req, res) => {
+        try {
+            const photo = await Photos.findOneAndDelete({_id: req.params.id, user: req.user._id})
+            await Comments.deleteMany({_id: {$in: photo.comments }})
+
+            res.json({
+                msg: 'Deleted !',
+                newPhoto: {
+                    ...photo,
+                    user: req.user
+                }
+            })
+
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    },
+    savePhoto: async (req, res) => {
+        try {
+            const user = await Users.find({_id: req.user._id, saved: req.params.id})
+            if(user.length > 0) return res.status(400).json({msg: "You saved this photo."})
+
+            const save = await Users.findOneAndUpdate({_id: req.user._id}, {
+                $push: {saved: req.params.id}
+            }, {new: true})
+
+            if(!save) return res.status(400).json({msg: 'This user does not exist.'})
+
+            res.json({msg: 'Saved photo!'})
+
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    },
+    unSavePhoto: async (req, res) => {
+        try {
+            const save = await Users.findOneAndUpdate({_id: req.user._id}, {
+                $pull: {saved: req.params.id}
+            }, {new: true})
+
+            if(!save) return res.status(400).json({msg: 'This user does not exist.'})
+
+            res.json({msg: 'unSaved photo!'})
+
+        } catch (err) {
+            return res.status(500).json({msg: err.message})
+        }
+    },
+    getSavePhotos: async (req, res) => {
+        try {
+            const features = new APIfeatures(Photos.find({
+                _id: {$in: req.user.saved}
+            }), req.query).paginating()
+
+            const savePhotos = await features.query.sort("-createdAt")            .populate("user likes", "avatar username fullname followers")
+
+            res.json({
+                savePhotos,
+                result: savePhotos.length
             })
 
         } catch (err) {
@@ -259,4 +255,4 @@ const videoCtrl = {
     },
 }
 
-module.exports = videoCtrl
+module.exports = photoCtrl

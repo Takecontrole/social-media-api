@@ -4,8 +4,7 @@ const userCtrl = {
     searchUser: async (req, res) => {
         try {
             const users = await Users.find({username: {$regex: req.query.username}})
-            .limit(10).select("fullname username avatar address")
-            
+            .limit(10).select("fullname username avatar address gender")
             res.json({users})
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -31,7 +30,7 @@ const userCtrl = {
                 avatar, bg, fullname, mobile, address, story, website, gender
             })
 
-            res.json({msg: "Update Success!"})
+            res.json({msg: "Успешно обновлено!"})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})

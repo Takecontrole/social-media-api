@@ -41,7 +41,7 @@ const messageCtrl = {
 
             await newMessage.save()
 
-            res.json({msg: 'Create Success!'})
+            res.json({msg: 'Отправлено!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -88,7 +88,7 @@ const messageCtrl = {
     deleteMessages: async (req, res) => {
         try {
             await Messages.findOneAndDelete({_id: req.params.id, sender: req.user._id})
-            res.json({msg: 'Delete Success!'})
+            res.json({msg: 'Успешно удалено!'})
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
@@ -103,7 +103,7 @@ const messageCtrl = {
             })
             await Messages.deleteMany({conversation: newConver._id})
             
-            res.json({msg: 'Delete Success!'})
+            res.json({msg: 'Удалено!'})
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }

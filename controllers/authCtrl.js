@@ -36,7 +36,7 @@ const authCtrl = {
             await newUser.save()
 
             res.json({
-                msg: 'Register Success!',
+                msg: 'Регистрация завершена!',
                 access_token,
                 user: {
                     ...newUser._doc,
@@ -69,7 +69,7 @@ const authCtrl = {
             })
 
             res.json({
-                msg: 'Login Success!',
+                msg: 'Вы вошли в аккаунт!',
                 access_token,
                 user: {
                     ...user._doc,

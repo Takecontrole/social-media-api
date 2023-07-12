@@ -6,7 +6,7 @@ router.get('/searchpost', auth, postCtrl.searchPost)
 
 router.route('/posts')
     .post(auth, postCtrl.createPost)
-    .get(auth, postCtrl.getPosts)
+    .get( postCtrl.getPosts)
 
 router.route('/post/:id')
     .patch(auth, postCtrl.updatePost)
