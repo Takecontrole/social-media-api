@@ -48,7 +48,7 @@ const photoCtrl = {
             await newPhoto.save()
 
             res.json({
-                msg: 'Created !',
+                msg: 'Создано !',
                 newPhoto: {
                     ...newPhoto._doc,
                     user: req.user
@@ -113,7 +113,7 @@ const photoCtrl = {
     likePhoto: async (req, res) => {
         try {
             const photo = await Photos.find({_id: req.params.id, likes: req.user._id})
-            if(photo.length > 0) return res.status(400).json({msg: "You liked this photo."})
+            if(photo.length > 0) return res.status(400).json({msg: "Лайкнуто."})
 
             const like = await Photos.findOneAndUpdate({_id: req.params.id}, {
                 $push: {likes: req.user._id}
@@ -121,7 +121,7 @@ const photoCtrl = {
 
             if(!like) return res.status(400).json({msg: 'This ph does not exist.'})
 
-            res.json({msg: 'Liked !'})
+            res.json({msg: 'Лайк !'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -136,7 +136,7 @@ const photoCtrl = {
 
             if(!like) return res.status(400).json({msg: 'This ph does not exist.'})
 
-            res.json({msg: 'UnLiked !'})
+            res.json({msg: 'Убран !'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -194,7 +194,7 @@ const photoCtrl = {
             await Comments.deleteMany({_id: {$in: photo.comments }})
 
             res.json({
-                msg: 'Deleted !',
+                msg: 'Удален !',
                 newPhoto: {
                     ...photo,
                     user: req.user

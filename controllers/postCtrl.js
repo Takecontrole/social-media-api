@@ -48,7 +48,7 @@ const postCtrl = {
             await newPost.save()
 
             res.json({
-                msg: 'Created Post!',
+                msg: 'Создан!',
                 newPost: {
                     ...newPost._doc,
                     user: req.user
@@ -100,7 +100,7 @@ const postCtrl = {
             })
 
             res.json({
-                msg: "Updated Post!",
+                msg: "Обновлен!",
                 newPost: {
                     ...post._doc,
                     content, images
@@ -121,7 +121,7 @@ const postCtrl = {
 
             if(!like) return res.status(400).json({msg: 'This post does not exist.'})
 
-            res.json({msg: 'Liked Post!'})
+            res.json({msg: 'Лайк!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -136,7 +136,7 @@ const postCtrl = {
 
             if(!like) return res.status(400).json({msg: 'This post does not exist.'})
 
-            res.json({msg: 'UnLiked Post!'})
+            res.json({msg: 'Анлайкт!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -200,7 +200,7 @@ const postCtrl = {
                 { $sample: { size: Number(num) } },
             ])
             return res.json({
-                msg: 'Success!',
+                msg: 'Успешно!',
                 result: posts.length,
                 posts
             })
@@ -215,7 +215,7 @@ const postCtrl = {
             await Comments.deleteMany({_id: {$in: post.comments }})
 
             res.json({
-                msg: 'Deleted Post!',
+                msg: 'Улалено!',
                 newPost: {
                     ...post,
                     user: req.user
@@ -237,7 +237,7 @@ const postCtrl = {
 
             if(!save) return res.status(400).json({msg: 'This user does not exist.'})
 
-            res.json({msg: 'Saved Post!'})
+            res.json({msg: 'Сохранено!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -251,7 +251,7 @@ const postCtrl = {
 
             if(!save) return res.status(400).json({msg: 'This user does not exist.'})
 
-            res.json({msg: 'unSaved Post!'})
+            res.json({msg: 'Удалён из закладок!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})

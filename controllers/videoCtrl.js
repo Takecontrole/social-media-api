@@ -50,7 +50,7 @@ const videoCtrl = {
             await newVideo.save()
 
             res.json({
-                msg: 'Created video!',
+                msg: 'Создано!',
                 newVideo: {
                     ...newVideo._doc,
                     user: req.user
@@ -178,7 +178,7 @@ const videoCtrl = {
         likeVideo: async (req, res) => {
         try {
             const video = await Videos.find({_id: req.params.id, likes: req.user._id})
-            if(video.length > 0) return res.status(400).json({msg: "You liked this video."})
+            if(video.length > 0) return res.status(400).json({msg: "Вы лайкнули."})
 
            const like =
             await Videos.findOneAndUpdate({_id: req.params.id}, {
@@ -220,7 +220,7 @@ const videoCtrl = {
 
             if(!save) return res.status(400).json({msg: 'This user does not exist.'})
 
-            res.json({msg: 'Saved Post!'})
+            res.json({msg: 'Сохранено!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})

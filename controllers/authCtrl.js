@@ -69,7 +69,7 @@ const authCtrl = {
             })
 
             res.json({
-                msg: 'Вы вошли в аккаунт!',
+                msg: 'Вы вошли в аккаунт! Приятного просмотра!',
                 access_token,
                 user: {
                     ...user._doc,
@@ -83,7 +83,7 @@ const authCtrl = {
     logout: async (req, res) => {
         try {
             res.clearCookie('refreshtoken', {path: '/api/refresh_token'})
-            return res.json({msg: "Logged out!"})
+            return res.json({msg: "Вы вышли!"})
         } catch (err) {
             return res.status(500).json({msg: err.message})
         }
@@ -91,10 +91,10 @@ const authCtrl = {
     generateAccessToken: async (req, res) => {
         try {
             const rf_token = req.cookies.refreshtoken
-            if(!rf_token) return res.status(400).json({msg: "Please login now."})
+            if(!rf_token) return res.status(400).json({msg: "Авторизируйтесь снова."})
 
             jwt.verify(rf_token, process.env.REFRESH_TOKEN_SECRET, async(err, result) => {
-                if(err) return res.status(400).json({msg: "Please login now."})
+                if(err) return res.status(400).json({msg: "Авторизируйтесь снова."})
 
                 const user = await Users.findById(result.id).select("-password")
                 .populate('followers following', 'avatar username fullname followers following')

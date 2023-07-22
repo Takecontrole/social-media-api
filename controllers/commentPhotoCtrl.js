@@ -48,13 +48,13 @@ const commentPhotoCtrl = {
     likeComment: async (req, res) => {
         try {
             const comment = await Comments.find({_id: req.params.id, likes: req.user._id})
-            if(comment.length > 0) return res.status(400).json({msg: "You liked this photo."})
+            if(comment.length > 0) return res.status(400).json({msg: "Уже лайнули!"})
 
             await Comments.findOneAndUpdate({_id: req.params.id}, {
                 $push: {likes: req.user._id}
             }, {new: true})
 
-            res.json({msg: 'Liked Comment!'})
+            res.json({msg: 'Лайк!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -67,7 +67,7 @@ const commentPhotoCtrl = {
                 $pull: {likes: req.user._id}
             }, {new: true})
 
-            res.json({msg: 'UnLiked Comment!'})
+            res.json({msg: 'Лайк снят!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
@@ -87,7 +87,7 @@ const commentPhotoCtrl = {
                 $pull: {comments: req.params.id}
             })
 
-            res.json({msg: 'Deleted Comment!'})
+            res.json({msg: 'Коммент удалён!'})
 
         } catch (err) {
             return res.status(500).json({msg: err.message})
